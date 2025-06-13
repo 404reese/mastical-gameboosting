@@ -25,12 +25,15 @@ export default function BuyMoneyForPcPage() {
     { amount: 200, label: '200 Million', price: 64 },
   ];
   
+  // Define delivery time type
+  type DeliveryTime = 'standard' | 'express' | 'ultraExpress';
+
   // Default to first package
   const [selectedPackage, setSelectedPackage] = useState(moneyPackages[0]);
-  const [deliveryTime, setDeliveryTime] = useState('standard');
+  const [deliveryTime, setDeliveryTime] = useState<DeliveryTime>('standard');
   
   // Delivery multiplier (now using fixed additional costs instead)
-  const deliveryCosts = {
+  const deliveryCosts: Record<DeliveryTime, number> = {
     standard: 0,
     express: 5,
     ultraExpress: 10
@@ -125,7 +128,7 @@ export default function BuyMoneyForPcPage() {
                 {/* Delivery Time */}
                 <div>
                   <label className="block text-sm font-medium mb-2">Delivery Time</label>
-                  <Select value={deliveryTime} onValueChange={setDeliveryTime}>
+                  <Select value={deliveryTime} onValueChange={val => setDeliveryTime(val as DeliveryTime)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select delivery time" />
                     </SelectTrigger>
