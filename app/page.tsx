@@ -51,7 +51,7 @@ export default function Home() {
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: `url('https://images.pexels.com/photos/442576/pexels-photo-442576.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop')`
+            backgroundImage: `url('/heroimg.jpg')`
           }}
         />
         <div className="relative z-20 text-center px-4 max-w-4xl mx-auto">

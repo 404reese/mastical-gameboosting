@@ -71,6 +71,9 @@ export default function Footer() {
           <p className="text-sm text-muted-foreground">
             © 2025 Premium Gaming. All rights reserved. | Terms of Service | Privacy Policy
           </p>
+          <p className="text-sm text-muted-foreground mt-1 font-mono">
+            Designed & Developed by <span className="text-primary/80"><a href="https://mastical.com/" target="_blank">Mastical</a> </span>
+          </p>
         </div>
       </div>
     </footer>
