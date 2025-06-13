@@ -6,63 +6,56 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 export default function ServicesPage() {
   const services = [
     {
-      title: 'GTA5 Money Boost - PC',
+      title: 'GTA5 Pure Cash - PC',
       description: 'Get millions in GTA5 cash instantly. Safe and reliable service with 24/7 support.',
-      price: '$9.99',
+      price: '$8',
       platform: 'PC',
       href: '/buy-money-for-pc',
       badge: 'Popular'
     },
     {
-      title: 'GTA5 Money Boost - Xbox',
+      title: 'GTA5 Pure Cash - Xbox',
       description: 'Xbox players can get instant cash boosts with secure delivery methods.',
-      price: '$12.99',
+      price: '$8',
       platform: 'Xbox',
       href: '/buy-money-for-xbox'
     },
     {
-      title: 'GTA5 Money Boost - PS5',
-      description: 'PlayStation 5 money boost service with fast and secure delivery.',
-      price: '$11.99',
-      platform: 'PS5',
+      title: 'GTA5 Pure Cash - PS',
+      description: 'PlayStation money boost service with fast and secure delivery.',
+      price: '$8',
+      platform: 'PS',
       href: '/buy-money-for-ps5'
     },
     {
-      title: 'GTA5 Credits - PC',
-      description: 'Purchase Shark Cards and credits for all your GTA5 purchasing needs.',
-      price: '$7.99',
-      platform: 'PC',
-      href: '/buy-credits-for-pc'
-    },
-    {
-      title: 'Rank Boost Service',
-      description: 'Level up your character fast with our professional rank boost service.',
-      price: '$15.99',
+      title: 'GTA5 Car + Cash - Xbox',
+      description: 'Boost your GTA5 experience with our car and cash boost service.',
+      price: '$6',
       platform: 'All Platforms',
       href: '/buy-rank-boost',
-      badge: 'New'
+      
     },
     {
-      title: 'Unlock All Service',
-      description: 'Unlock all weapons, vehicles, and items in GTA5 with one service.',
+      title: 'GTA5 Car + Cash - PS',
+      description: 'Boost your GTA5 experience with our car and cash boost service.',
       price: '$24.99',
       platform: 'All Platforms',
       href: '/buy-unlock-all',
-      badge: 'Premium'
+      badge: 'Hot'
     },
     {
-      title: 'Heist Completion',
-      description: 'Complete all heists and get maximum payouts with professional help.',
-      price: '$19.99',
-      platform: 'All Platforms',
+      title: 'GTA5 Car + Cash - PC',
+      description: 'Boost your GTA5 experience with our car and cash boost service.',
+      price: '$6',
+      platform: 'PC',
       href: '/buy-heist-completion'
     },
     {
-      title: 'Account Recovery',
-      description: 'Recover banned or suspended accounts with our professional service.',
-      price: '$49.99',
+      title: 'Rank Boosting',
+      description: 'Level up your character fast with our professional boost service.',
+      price: '$22.50',
       platform: 'All Platforms',
-      href: '/buy-account-recovery',
+      href: '/buy-rank-boost',
       badge: 'Expert'
     }
   ];
