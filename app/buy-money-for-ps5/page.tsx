@@ -6,38 +6,61 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Zap, Clock, Star, DollarSign, CheckCircle } from 'lucide-react';
 
 export default function BuyMoneyForPs5Page() {
-  const [amount, setAmount] = useState([10]);
-  const [deliveryTime, setDeliveryTime] = useState('24h');
+  // Define money packages (adjust prices as needed)
+  const moneyPackages = [
+    { amount: 10, label: '10 Million', price: 8 },
+    { amount: 15, label: '15 Million', price: 10 },
+    { amount: 20, label: '20 Million', price: 12 },
+    { amount: 25, label: '25 Million', price: 14 },
+    { amount: 30, label: '30 Million', price: 16 },
+    { amount: 40, label: '40 Million', price: 18 },
+    { amount: 50, label: '50 Million', price: 20 },
+    { amount: 60, label: '60 Million', price: 22 },
+    { amount: 75, label: '75 Million', price: 25 },
+    { amount: 100, label: '100 Million', price: 35 },
+    { amount: 150, label: '150 Million', price: 52 },
+    { amount: 200, label: '200 Million', price: 64 },,
+  ];
+
+  type DeliveryTime = 'standard' | 'express' | 'ultraExpress';
+  const [selectedPackage, setSelectedPackage] = useState(moneyPackages[0]);
+  const [deliveryTime, setDeliveryTime] = useState<DeliveryTime>('standard');
   const [psVersion, setPsVersion] = useState('ps5');
-  const [region, setRegion] = useState('us');
-  const [accountType, setAccountType] = useState('standard');
-  
-  const basePrice = 11.99;
-  const amountMultiplier = amount[0] / 10;
-  const deliveryMultiplier = deliveryTime === '1h' ? 2 : deliveryTime === '6h' ? 1.5 : 1;
-  const regionMultiplier = region === 'eu' ? 1.1 : region === 'asia' ? 1.2 : 1;
-  const accountMultiplier = accountType === 'premium' ? 1.3 : 1;
-  const totalPrice = (basePrice * amountMultiplier * deliveryMultiplier * regionMultiplier * accountMultiplier).toFixed(2);
+
+  const deliveryCosts: Record<DeliveryTime, number> = {
+    standard: 0,
+    express: 5,
+    ultraExpress: 10
+  };
+  const totalPrice = (selectedPackage.price + deliveryCosts[deliveryTime]).toFixed(2);
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
       
-      <section className="py-20 bg-[#1C1C1C]">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <section
+        className="py-20 bg-cover bg-center relative"
+        style={{ backgroundImage: "url('/moneyboostcover.jpeg')" }}
+      >
+        {/* Black Tint Overlay */}
+        <div className="absolute inset-0 bg-black/60"></div>
+
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <Badge className="mb-4 bg-blue-500/20 text-blue-400">PlayStation Platform</Badge>
-            <h1 className="font-impact text-5xl mb-6 text-glow">
-              GTA5 Money Boost - PlayStation
+            <Badge className="mb-4 bg-blue-500/20 text-blue-400">
+              PS Platform
+            </Badge>
+            <h1 className="font-impact text-5xl mb-6 text-white">
+              GTA5 Money Boost - PS
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Professional GTA5 money boost service for PlayStation 5 and PS4. 
-              Fast, secure delivery with comprehensive customization options.
+              Get millions in GTA5 cash instantly for PS. Safe, reliable, and
+              fast delivery with professional support. No account sharing
+              required.
             </p>
           </div>
         </div>
@@ -56,21 +79,23 @@ export default function BuyMoneyForPs5Page() {
               </CardHeader>
               <CardContent className="space-y-6">
                 
+                {/* Money Amount as buttons */}
                 <div>
                   <label className="block text-sm font-medium mb-2">
-                    Money Amount: ${amount[0]} Million
+                    Money Amount: {selectedPackage.label} (${selectedPackage.price})
                   </label>
-                  <Slider
-                    value={amount}
-                    onValueChange={setAmount}
-                    max={100}
-                    min={5}
-                    step={5}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                    <span>$5M</span>
-                    <span>$100M</span>
+                  <div className="flex flex-wrap gap-2">
+                    {moneyPackages.map(pkg => (
+                      <Button
+                        key={pkg.amount}
+                        type="button"
+                        variant={selectedPackage.amount === pkg.amount ? "default" : "outline"}
+                        className={`px-4 py-2 text-sm ${selectedPackage.amount === pkg.amount ? "ring-2 ring-primary" : ""}`}
+                        onClick={() => setSelectedPackage(pkg)}
+                      >
+                        {pkg.label} - ${pkg.price}
+                      </Button>
+                    ))}
                   </div>
                 </div>
 
@@ -88,47 +113,35 @@ export default function BuyMoneyForPs5Page() {
                   </Select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">Region</label>
-                  <Select value={region} onValueChange={setRegion}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your region" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="us">North America (US/CA)</SelectItem>
-                      <SelectItem value="eu">Europe (+10%)</SelectItem>
-                      <SelectItem value="asia">Asia Pacific (+20%)</SelectItem>
-                      <SelectItem value="other">Other Regions</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">Account Type</label>
-                  <Select value={accountType} onValueChange={setAccountType}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select account type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="standard">Standard Account</SelectItem>
-                      <SelectItem value="premium">Premium Account (+30%)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
+                {/* Delivery Time as buttons */}
                 <div>
                   <label className="block text-sm font-medium mb-2">Delivery Time</label>
-                  <Select value={deliveryTime} onValueChange={setDeliveryTime}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select delivery time" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1h">1 Hour (+100%)</SelectItem>
-                      <SelectItem value="6h">6 Hours (+50%)</SelectItem>
-                      <SelectItem value="24h">24 Hours (Standard)</SelectItem>
-                      <SelectItem value="48h">48 Hours (-10%)</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      variant={deliveryTime === 'standard' ? "default" : "outline"}
+                      className={`px-4 py-2 text-sm ${deliveryTime === 'standard' ? "ring-2 ring-primary" : ""}`}
+                      onClick={() => setDeliveryTime('standard')}
+                    >
+                      Standard (24h-72h) $0
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={deliveryTime === 'express' ? "default" : "outline"}
+                      className={`px-4 py-2 text-sm ${deliveryTime === 'express' ? "ring-2 ring-primary" : ""}`}
+                      onClick={() => setDeliveryTime('express')}
+                    >
+                      Express (12-24h) $5
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={deliveryTime === 'ultraExpress' ? "default" : "outline"}
+                      className={`px-4 py-2 text-sm ${deliveryTime === 'ultraExpress' ? "ring-2 ring-primary" : ""}`}
+                      onClick={() => setDeliveryTime('ultraExpress')}
+                    >
+                      Ultra Express (≤12h) $10
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="bg-background/50 p-4 rounded-lg border border-border/40">
@@ -137,7 +150,7 @@ export default function BuyMoneyForPs5Page() {
                     <span className="text-3xl font-bold text-primary">${totalPrice}</span>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Includes ${amount[0]}M GTA5 cash for PlayStation
+                    Includes {selectedPackage.label} GTA5 cash for PlayStation
                   </p>
                 </div>
 
