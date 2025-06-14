@@ -92,24 +92,19 @@ export default function BuyMoneyForPcPage() {
                   <label className="block text-sm font-medium mb-2">
                     Money Amount: {selectedPackage.label} (${selectedPackage.price})
                   </label>
-                  <Select
-                    value={selectedPackage.amount.toString()}
-                    onValueChange={val => {
-                      const pkg = moneyPackages.find(p => p.amount.toString() === val);
-                      if (pkg) setSelectedPackage(pkg);
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select amount" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {moneyPackages.map(pkg => (
-                        <SelectItem key={pkg.amount} value={pkg.amount.toString()}>
-                          {pkg.label} - ${pkg.price}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="flex flex-wrap gap-2">
+                    {moneyPackages.map(pkg => (
+                      <Button
+                        key={pkg.amount}
+                        type="button"
+                        variant={selectedPackage.amount === pkg.amount ? "default" : "outline"}
+                        className={`px-4 py-2 text-sm ${selectedPackage.amount === pkg.amount ? "ring-2 ring-primary" : ""}`}
+                        onClick={() => setSelectedPackage(pkg)}
+                      >
+                        {pkg.label} - ${pkg.price}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
                 
                 {/* Platform (Fixed for PC) */}
