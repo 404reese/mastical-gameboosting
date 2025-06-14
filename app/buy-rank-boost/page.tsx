@@ -6,33 +6,46 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, DollarSign, CheckCircle, Trophy } from 'lucide-react';
 
 export default function BuyRankBoostPage() {
-  const [currentLevel, setCurrentLevel] = useState([1]);
-  const [targetLevel, setTargetLevel] = useState([50]);
   const [platform, setPlatform] = useState('pc');
-  const [deliveryTime, setDeliveryTime] = useState('48h');
-  
-  const levelDifference = Math.max(0, targetLevel[0] - currentLevel[0]);
-  const basePrice = 0.99;
-  const levelPrice = levelDifference * basePrice;
-  const platformMultiplier = platform === 'xbox' ? 1.2 : platform === 'ps5' ? 1.1 : 1;
-  const deliveryMultiplier = deliveryTime === '24h' ? 1.5 : deliveryTime === '48h' ? 1 : 0.8;
-  const totalPrice = (levelPrice * platformMultiplier * deliveryMultiplier).toFixed(2);
+  const [deliveryTime, setDeliveryTime] = useState<'standard' | 'express' | 'ultra' | null>('standard');
+  const [selectedRank, setSelectedRank] = useState<100 | 200 | null>(null);
+
+  const rankOptions = [
+    { rank: 100, price: 22.5 },
+    { rank: 200, price: 27.5 },
+  ];
+
+  const deliveryOptions = [
+    { key: 'standard', label: 'Standard (24h-72h)', fee: 0 },
+    { key: 'express', label: 'Express (12-24h)', fee: 5 },
+    { key: 'ultra', label: 'Ultra Express (12h)', fee: 10 },
+  ];
+
+  const selectedOption = rankOptions.find(opt => opt.rank === selectedRank);
+  const selectedDelivery = deliveryOptions.find(opt => opt.key === deliveryTime);
+  const totalPrice = selectedOption
+    ? (selectedOption.price + (selectedDelivery ? selectedDelivery.fee : 0)).toFixed(2)
+    : '0.00';
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
-      <section className="py-20 bg-[#1C1C1C]">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <section
+        className="py-20 bg-cover bg-center relative"
+        style={{ backgroundImage: "url('/gtaimg.jpg')" }}
+      >
+        {/* Black Tint Overlay */}
+        <div className="absolute inset-0 bg-black/60"></div>
+
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             <Badge className="mb-4 bg-yellow-500/20 text-yellow-400">All Platforms</Badge>
-            <h1 className="font-impact text-5xl mb-6 text-glow">
-              GTA5 Rank Boost Service
+            <h1 className="font-impact text-5xl mb-6 text-white">
+               GTA5 Rank Boost Service
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Professional rank boosting service for GTA5. Level up your character fast 
@@ -50,47 +63,27 @@ export default function BuyRankBoostPage() {
               <CardHeader>
                 <CardTitle className="font-impact text-2xl flex items-center">
                   <TrendingUp className="mr-2 h-6 w-6 text-primary" />
-                  Customize Your Rank Boost
+                  Choose Your Rank Boost
                 </CardTitle>
                 <CardDescription>
-                  Set your current level and target level to calculate pricing.
+                  Select your desired rank boost package.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 
                 <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Current Level: {currentLevel[0]}
-                  </label>
-                  <Slider
-                    value={currentLevel}
-                    onValueChange={setCurrentLevel}
-                    max={999}
-                    min={1}
-                    step={1}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                    <span>Level 1</span>
-                    <span>Level 999</span>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Target Level: {targetLevel[0]}
-                  </label>
-                  <Slider
-                    value={targetLevel}
-                    onValueChange={setTargetLevel}
-                    max={999}
-                    min={currentLevel[0] + 1}
-                    step={1}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                    <span>Level {currentLevel[0] + 1}</span>
-                    <span>Level 999</span>
+                  <label className="block text-sm font-medium mb-2">Select Rank</label>
+                  <div className="flex gap-4">
+                    {rankOptions.map(option => (
+                      <Button
+                        key={option.rank}
+                        variant={selectedRank === option.rank ? "default" : "outline"}
+                        className={`flex-1 py-6 text-lg ${selectedRank === option.rank ? 'border-primary ring-2 ring-primary' : ''}`}
+                        onClick={() => setSelectedRank(option.rank)}
+                      >
+                        Rank {option.rank} (${option.price.toFixed(2)})
+                      </Button>
+                    ))}
                   </div>
                 </div>
 
@@ -110,28 +103,30 @@ export default function BuyRankBoostPage() {
 
                 <div>
                   <label className="block text-sm font-medium mb-2">Delivery Time</label>
-                  <Select value={deliveryTime} onValueChange={setDeliveryTime}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select delivery time" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="24h">24 Hours (+50%)</SelectItem>
-                      <SelectItem value="48h">48 Hours (Standard)</SelectItem>
-                      <SelectItem value="72h">72 Hours (-20%)</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="flex gap-4">
+                    {deliveryOptions.map(option => (
+                      <Button
+                        key={option.key}
+                        variant={deliveryTime === option.key ? "default" : "outline"}
+                        className={`flex-1 py-4 text-base ${deliveryTime === option.key ? 'border-primary ring-2 ring-primary' : ''}`}
+                        onClick={() => setDeliveryTime(option.key as 'standard' | 'express' | 'ultra')}
+                      >
+                        {option.label} {option.fee > 0 ? `+$${option.fee}` : ''}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="bg-background/50 p-4 rounded-lg border border-border/40">
                   <div className="mb-2">
                     <p className="text-sm text-muted-foreground">
-                      Level {currentLevel[0]} → Level {targetLevel[0]} ({levelDifference} levels)
+                      {selectedRank ? `Selected Rank: ${selectedRank}` : 'Please select a rank'}
                     </p>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-medium">Total Price:</span>
                     <span className="text-3xl font-bold text-primary">
-                      ${levelDifference > 0 ? totalPrice : '0.00'}
+                      ${selectedRank ? totalPrice : '0.00'}
                     </span>
                   </div>
                 </div>
@@ -139,10 +134,10 @@ export default function BuyRankBoostPage() {
                 <Button 
                   size="lg" 
                   className="w-full bg-primary hover:bg-primary/90 text-lg py-3"
-                  disabled={levelDifference <= 0}
+                  disabled={!selectedRank}
                 >
                   <DollarSign className="mr-2 h-5 w-5" />
-                  {levelDifference > 0 ? `Order Rank Boost - $${totalPrice}` : 'Select Target Level'}
+                  {selectedRank ? `Order Rank Boost - $${totalPrice}` : 'Select Rank Option'}
                 </Button>
               </CardContent>
             </Card>

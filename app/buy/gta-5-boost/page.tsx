@@ -48,7 +48,7 @@ export default function ServicesPage() {
       description: 'Boost your GTA5 experience with our car and cash boost service.',
       price: '$6',
       platform: 'PC',
-      href: '/buy-heist-completion'
+      href: '/buy-car-cash-for-pc'
     },
     {
       title: 'Rank Boosting',
