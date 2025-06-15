@@ -11,7 +11,7 @@ import { Shield, Zap, Clock, Star, DollarSign, CheckCircle } from 'lucide-react'
 
 export default function BuyMoneyForPs5Page() {
   // Define money packages (adjust prices as needed)
-  const moneyPackages = [
+  const moneyPackages: { amount: number; label: string; price: number }[] = [
     { amount: 10, label: '10 Million', price: 8 },
     { amount: 15, label: '15 Million', price: 10 },
     { amount: 20, label: '20 Million', price: 12 },
@@ -23,11 +23,11 @@ export default function BuyMoneyForPs5Page() {
     { amount: 75, label: '75 Million', price: 25 },
     { amount: 100, label: '100 Million', price: 35 },
     { amount: 150, label: '150 Million', price: 52 },
-    { amount: 200, label: '200 Million', price: 64 },,
+    { amount: 200, label: '200 Million', price: 64 }
   ];
 
   type DeliveryTime = 'standard' | 'express' | 'ultraExpress';
-  const [selectedPackage, setSelectedPackage] = useState(moneyPackages[0]);
+  const [selectedPackage, setSelectedPackage] = useState<typeof moneyPackages[0] | undefined>(moneyPackages[0]);
   const [deliveryTime, setDeliveryTime] = useState<DeliveryTime>('standard');
   const [psVersion, setPsVersion] = useState('ps5');
 
@@ -36,7 +36,7 @@ export default function BuyMoneyForPs5Page() {
     express: 5,
     ultraExpress: 10
   };
-  const totalPrice = (selectedPackage.price + deliveryCosts[deliveryTime]).toFixed(2);
+  const totalPrice = ((selectedPackage?.price ?? 0) + deliveryCosts[deliveryTime]).toFixed(2);
 
   return (
     <div className="min-h-screen bg-background">
@@ -82,15 +82,15 @@ export default function BuyMoneyForPs5Page() {
                 {/* Money Amount as buttons */}
                 <div>
                   <label className="block text-sm font-medium mb-2">
-                    Money Amount: {selectedPackage.label} (${selectedPackage.price})
+                    Money Amount: {selectedPackage?.label ?? 'N/A'} (${selectedPackage?.price ?? '0'})
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {moneyPackages.map(pkg => (
                       <Button
                         key={pkg.amount}
                         type="button"
-                        variant={selectedPackage.amount === pkg.amount ? "default" : "outline"}
-                        className={`px-4 py-2 text-sm ${selectedPackage.amount === pkg.amount ? "ring-2 ring-primary" : ""}`}
+                        variant={selectedPackage?.amount === pkg.amount ? "default" : "outline"}
+                        className={`px-4 py-2 text-sm ${selectedPackage?.amount === pkg.amount ? "ring-2 ring-primary" : ""}`}
                         onClick={() => setSelectedPackage(pkg)}
                       >
                         {pkg.label} - ${pkg.price}
@@ -150,7 +150,7 @@ export default function BuyMoneyForPs5Page() {
                     <span className="text-3xl font-bold text-primary">${totalPrice}</span>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Includes {selectedPackage.label} GTA5 cash for PlayStation
+                    Includes {selectedPackage?.label ?? 'N/A'} GTA5 cash for PlayStation
                   </p>
                 </div>
 

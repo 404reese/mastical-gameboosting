@@ -79,7 +79,7 @@ export default function BuyRankBoostPage() {
                         key={option.rank}
                         variant={selectedRank === option.rank ? "default" : "outline"}
                         className={`flex-1 py-6 text-lg ${selectedRank === option.rank ? 'border-primary ring-2 ring-primary' : ''}`}
-                        onClick={() => setSelectedRank(option.rank)}
+                        onClick={() => setSelectedRank(option.rank as 100 | 200)}
                       >
                         Rank {option.rank} (${option.price.toFixed(2)})
                       </Button>
