@@ -25,22 +25,22 @@ export default function ServicesPage() {
       description: 'PlayStation money boost service with fast and secure delivery.',
       price: '$8',
       platform: 'PS',
-      href: '/buy-money-for-ps5'
+      href: '/buy-money-for-ps'
     },
     {
       title: 'GTA5 Car + Cash - Xbox',
       description: 'Boost your GTA5 experience with our car and cash boost service.',
       price: '$6',
-      platform: 'All Platforms',
-      href: '/buy-rank-boost',
+      platform: 'Xbox',
+      href: '/buy-car-cash-for-xbox',
       
     },
     {
       title: 'GTA5 Car + Cash - PS',
       description: 'Boost your GTA5 experience with our car and cash boost service.',
       price: '$24.99',
-      platform: 'All Platforms',
-      href: '/buy-unlock-all',
+      platform: 'PS',
+      href: '/buy-car-cash-for-ps',
       badge: 'Hot'
     },
     {

@@ -7,12 +7,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter, Eye, Download, RefreshCw } from 'lucide-react';
+import { Search, Filter, Eye, Download, RefreshCw, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { OrderService } from '@/lib/orderService';
+import { AdminOrderView } from '@/types/order';
 
 export default function OrdersManagement() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [orders, setOrders] = useState<AdminOrderView[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
@@ -22,33 +27,74 @@ export default function OrdersManagement() {
     const auth = localStorage.getItem('adminAuth');
     if (auth === 'true') {
       setIsAuthenticated(true);
+      loadOrders();
     } else {
       router.push('/admin');
     }
   }, [router]);
 
+  const loadOrders = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { data, error } = await OrderService.getAllOrders();
+      
+      if (error) {
+        setError('Failed to load orders');
+        console.error('Error loading orders:', error);
+      } else {
+        setOrders(data || []);
+      }
+    } catch (err) {
+      setError('Failed to load orders');
+      console.error('Unexpected error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefresh = () => {
+    loadOrders();
+  };
+
+  const handleExport = () => {
+    // Convert orders to CSV
+    const headers = ['Order ID', 'Customer Name', 'Email', 'Service', 'Amount', 'Payment Status', 'Order Status', 'Platform', 'Date'];
+    const csvContent = [
+      headers.join(','),
+      ...filteredOrders.map(order => [
+        order.order_id,
+        order.customer_name,
+        order.customer_email || '',
+        `"${order.service}"`,
+        order.amount,
+        order.payment_status,
+        order.order_status,
+        order.platform || '',
+        order.order_date
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `orders-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   if (!isAuthenticated) {
     return <div>Loading...</div>;
   }
 
-  // Mock orders data - replace with real data from your backend
-  const allOrders = [
-    { id: '#1234', customer: 'John Doe', email: 'john@example.com', service: 'PC Money Boost - $10M', amount: '$9.99', paymentStatus: 'Completed', orderStatus: 'Completed', date: '2024-01-15', platform: 'PC' },
-    { id: '#1235', customer: 'Jane Smith', email: 'jane@example.com', service: 'Xbox Rank Boost - Level 100', amount: '$15.99', paymentStatus: 'Completed', orderStatus: 'Processing', date: '2024-01-15', platform: 'Xbox' },
-    { id: '#1236', customer: 'Mike Johnson', email: 'mike@example.com', service: 'PS5 Credits - Megalodon', amount: '$7.99', paymentStatus: 'Pending', orderStatus: 'Pending', date: '2024-01-14', platform: 'PS5' },
-    { id: '#1237', customer: 'Sarah Wilson', email: 'sarah@example.com', service: 'Heist Completion - Cayo Perico', amount: '$19.99', paymentStatus: 'Completed', orderStatus: 'Completed', date: '2024-01-14', platform: 'PC' },
-    { id: '#1238', customer: 'Tom Brown', email: 'tom@example.com', service: 'Unlock All - Premium Package', amount: '$24.99', paymentStatus: 'Completed', orderStatus: 'Processing', date: '2024-01-13', platform: 'Xbox' },
-    { id: '#1239', customer: 'Lisa Davis', email: 'lisa@example.com', service: 'Account Recovery - Permanent Ban', amount: '$49.99', paymentStatus: 'Completed', orderStatus: 'Pending', date: '2024-01-13', platform: 'PC' },
-    { id: '#1240', customer: 'Chris Lee', email: 'chris@example.com', service: 'PC Money Boost - $25M', amount: '$19.99', paymentStatus: 'Refunded', orderStatus: 'Cancelled', date: '2024-01-12', platform: 'PC' },
-    { id: '#1241', customer: 'Amy White', email: 'amy@example.com', service: 'PS5 Rank Boost - Level 50', amount: '$12.99', paymentStatus: 'Completed', orderStatus: 'Completed', date: '2024-01-12', platform: 'PS5' }
-  ];
-
   // Filter orders based on search and status
-  const filteredOrders = allOrders.filter(order => {
-    const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || order.orderStatus.toLowerCase() === statusFilter.toLowerCase();
+  const filteredOrders = orders.filter(order => {
+    const matchesSearch = order.order_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         order.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (order.customer_email && order.customer_email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                         order.service.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || order.order_status.toLowerCase() === statusFilter.toLowerCase();
     return matchesSearch && matchesStatus;
   });
 
@@ -84,14 +130,13 @@ export default function OrdersManagement() {
           <div>
             <h1 className="font-impact text-3xl font-bold text-glow">Orders Management</h1>
             <p className="text-muted-foreground">Manage and track all customer orders</p>
-          </div>
-          <div className="flex space-x-2">
-            <Button variant="outline" size="sm">
+          </div>          <div className="flex space-x-2">
+            <Button variant="outline" size="sm" onClick={handleExport}>
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
-            <Button variant="outline" size="sm">
-              <RefreshCw className="mr-2 h-4 w-4" />
+            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading}>
+              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
               Refresh
             </Button>
           </div>
@@ -132,9 +177,7 @@ export default function OrdersManagement() {
               </div>
             </div>
           </CardContent>
-        </Card>
-
-        {/* Orders Table */}
+        </Card>        {/* Orders Table */}
         <Card className="bg-[#1C1C1C] border-border/40">
           <CardHeader>
             <div className="flex justify-between items-center">
@@ -145,66 +188,89 @@ export default function OrdersManagement() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border/40">
-                    <th className="text-left py-3 px-2 font-semibold">Order ID</th>
-                    <th className="text-left py-3 px-2 font-semibold">Customer</th>
-                    <th className="text-left py-3 px-2 font-semibold">Service</th>
-                    <th className="text-left py-3 px-2 font-semibold">Amount</th>
-                    <th className="text-left py-3 px-2 font-semibold">Payment</th>
-                    <th className="text-left py-3 px-2 font-semibold">Status</th>
-                    <th className="text-left py-3 px-2 font-semibold">Date</th>
-                    <th className="text-left py-3 px-2 font-semibold">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedOrders.map((order) => (
-                    <tr key={order.id} className="border-b border-border/20 hover:bg-background/50">
-                      <td className="py-3 px-2">
-                        <span className="font-mono text-sm">{order.id}</span>
-                      </td>
-                      <td className="py-3 px-2">
-                        <div>
-                          <p className="font-semibold text-sm">{order.customer}</p>
-                          <p className="text-xs text-muted-foreground">{order.email}</p>
-                        </div>
-                      </td>
-                      <td className="py-3 px-2">
-                        <div>
-                          <p className="text-sm">{order.service}</p>
-                          <Badge variant="outline" className="text-xs mt-1">{order.platform}</Badge>
-                        </div>
-                      </td>
-                      <td className="py-3 px-2">
-                        <span className="font-semibold text-primary">{order.amount}</span>
-                      </td>
-                      <td className="py-3 px-2">
-                        <Badge className={getPaymentStatusColor(order.paymentStatus)}>
-                          {order.paymentStatus}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-2">
-                        <Badge className={getStatusColor(order.orderStatus)}>
-                          {order.orderStatus}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-2">
-                        <span className="text-sm text-muted-foreground">{order.date}</span>
-                      </td>
-                      <td className="py-3 px-2">
-                        <Button variant="outline" size="sm" asChild>
-                          <Link href={`/admin/orders/${order.id.replace('#', '')}`}>
-                            <Eye className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                      </td>
+            {error && (
+              <div className="bg-red-500/20 text-red-400 p-4 rounded-lg mb-4">
+                {error}
+              </div>
+            )}
+            
+            {loading ? (
+              <div className="flex justify-center items-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin" />
+                <span className="ml-2">Loading orders...</span>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border/40">
+                      <th className="text-left py-3 px-2 font-semibold">Order ID</th>
+                      <th className="text-left py-3 px-2 font-semibold">Customer</th>
+                      <th className="text-left py-3 px-2 font-semibold">Service</th>
+                      <th className="text-left py-3 px-2 font-semibold">Amount</th>
+                      <th className="text-left py-3 px-2 font-semibold">Payment</th>
+                      <th className="text-left py-3 px-2 font-semibold">Status</th>
+                      <th className="text-left py-3 px-2 font-semibold">Date</th>
+                      <th className="text-left py-3 px-2 font-semibold">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {paginatedOrders.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="text-center py-8 text-muted-foreground">
+                          No orders found
+                        </td>
+                      </tr>
+                    ) : (
+                      paginatedOrders.map((order) => (
+                        <tr key={order.order_id} className="border-b border-border/20 hover:bg-background/50">
+                          <td className="py-3 px-2">
+                            <span className="font-mono text-sm">{order.order_id}</span>
+                          </td>
+                          <td className="py-3 px-2">
+                            <div>
+                              <p className="font-semibold text-sm">{order.customer_name}</p>
+                              <p className="text-xs text-muted-foreground">{order.customer_email || 'No email'}</p>
+                            </div>
+                          </td>
+                          <td className="py-3 px-2">
+                            <div>
+                              <p className="text-sm">{order.service}</p>
+                              {order.platform && (
+                                <Badge variant="outline" className="text-xs mt-1">{order.platform}</Badge>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 px-2">
+                            <span className="font-semibold text-primary">${order.amount}</span>
+                          </td>
+                          <td className="py-3 px-2">
+                            <Badge className={getPaymentStatusColor(order.payment_status)}>
+                              {order.payment_status}
+                            </Badge>
+                          </td>
+                          <td className="py-3 px-2">
+                            <Badge className={getStatusColor(order.order_status)}>
+                              {order.order_status}
+                            </Badge>
+                          </td>
+                          <td className="py-3 px-2">
+                            <span className="text-sm text-muted-foreground">{order.order_date}</span>
+                          </td>
+                          <td className="py-3 px-2">
+                            <Button variant="outline" size="sm" asChild>
+                              <Link href={`/admin/orders/${order.order_id}`}>
+                                <Eye className="h-4 w-4" />
+                              </Link>
+                            </Button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
 
             {/* Pagination */}
             {totalPages > 1 && (

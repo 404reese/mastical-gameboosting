@@ -15,18 +15,67 @@ import {
   Activity,
   ArrowRight,
   Package,
-  CreditCard
+  CreditCard,
+  RefreshCw
 } from 'lucide-react';
 import Link from 'next/link';
+import { OrderService } from '@/lib/orderService';
+import { AdminOrderView } from '@/types/order';
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [orders, setOrders] = useState<AdminOrderView[]>([]);
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    processing: 0,
+    completed: 0,
+    cancelled: 0,
+    totalRevenue: 0
+  });
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Fetch orders
+      const { data: ordersData, error: ordersError } = await OrderService.getAllOrders();
+      if (ordersError) {
+        console.error('Error fetching orders:', ordersError);
+        setError('Failed to load orders');
+      } else {
+        setOrders(ordersData || []);
+      }
+
+      // Fetch stats
+      const { data: statsData, error: statsError } = await OrderService.getOrderStats();
+      if (statsError) {
+        console.error('Error fetching stats:', statsError);
+        setError('Failed to load statistics');
+      } else {
+        setStats(statsData || {
+          total: 0,
+          pending: 0,
+          processing: 0,
+          completed: 0,
+          cancelled: 0,
+          totalRevenue: 0
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      setError('Failed to connect to database');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const auth = localStorage.getItem('adminAuth');
     if (auth === 'true') {
       setIsAuthenticated(true);
+      fetchData();
     } else {
       router.push('/admin');
     }
@@ -35,54 +84,48 @@ export default function AdminDashboard() {
   if (!isAuthenticated) {
     return <div>Loading...</div>;
   }
-
-  // Mock data - replace with real data from your backend
+  // Calculate metrics from real data
   const metrics = [
     {
-      title: 'Total Sales',
-      value: '$24,567.89',
+      title: 'Total Revenue',
+      value: `$${stats.totalRevenue.toLocaleString()}`,
       change: '+12.5%',
       icon: DollarSign,
       color: 'text-green-400'
     },
     {
       title: 'Total Orders',
-      value: '1,234',
+      value: stats.total.toString(),
       change: '+8.2%',
       icon: ShoppingCart,
       color: 'text-blue-400'
     },
     {
       title: 'Pending Orders',
-      value: '23',
-      change: '-5.1%',
+      value: stats.pending.toString(),
+      change: stats.pending > 0 ? `${stats.pending} pending` : 'None pending',
       icon: Clock,
       color: 'text-yellow-400'
     },
     {
-      title: 'New Customers',
-      value: '89',
-      change: '+15.3%',
+      title: 'Completed Orders',
+      value: stats.completed.toString(),
+      change: `${Math.round((stats.completed / stats.total) * 100) || 0}% completion rate`,
       icon: Users,
       color: 'text-purple-400'
     }
   ];
 
-  const recentOrders = [
-    { id: '#1234', customer: 'John Doe', service: 'PC Money Boost', amount: '$9.99', status: 'Completed', date: '2024-01-15' },
-    { id: '#1235', customer: 'Jane Smith', service: 'Xbox Rank Boost', amount: '$15.99', status: 'Processing', date: '2024-01-15' },
-    { id: '#1236', customer: 'Mike Johnson', service: 'PS5 Credits', amount: '$7.99', status: 'Pending', date: '2024-01-14' },
-    { id: '#1237', customer: 'Sarah Wilson', service: 'Heist Completion', amount: '$19.99', status: 'Completed', date: '2024-01-14' },
-    { id: '#1238', customer: 'Tom Brown', service: 'Unlock All', amount: '$24.99', status: 'Processing', date: '2024-01-13' }
-  ];
+  // Get recent orders (last 5)
+  const recentOrders = orders.slice(0, 5);
 
-  const recentActivity = [
-    { type: 'order', message: 'New order #1238 received', time: '2 minutes ago' },
-    { type: 'customer', message: 'New customer registration: Tom Brown', time: '15 minutes ago' },
-    { type: 'payment', message: 'Payment completed for order #1237', time: '1 hour ago' },
-    { type: 'order', message: 'Order #1236 status updated to Processing', time: '2 hours ago' },
-    { type: 'customer', message: 'New customer registration: Sarah Wilson', time: '3 hours ago' }
-  ];
+  // Generate recent activity from orders
+  const recentActivity = orders.slice(0, 5).map((order, index) => ({
+    type: 'order',
+    message: `Order ${order.order_id} - ${order.service}`,
+    time: new Date(order.created_at).toLocaleDateString(),
+    status: order.order_status
+  }));
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -91,18 +134,46 @@ export default function AdminDashboard() {
       case 'Pending': return 'bg-yellow-500/20 text-yellow-400';
       default: return 'bg-gray-500/20 text-gray-400';
     }
-  };
-
-  return (
+  };  return (
     <AdminLayout>
       <div className="space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="font-impact text-3xl font-bold text-glow">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back! Here's what's happening with your GTA5 boosting business.</p>
-        </div>
+        {/* Error Message */}
+        {error && (
+          <Card className="bg-red-900/20 border-red-500/50">
+            <CardContent className="pt-6">
+              <div className="flex items-center space-x-2 text-red-400">
+                <RefreshCw className="h-4 w-4" />
+                <span>{error}</span>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={fetchData}
+                  className="ml-auto"
+                >
+                  Retry
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-        {/* Metrics Cards */}
+        {/* Header */}
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="font-impact text-3xl font-bold text-glow">Dashboard</h1>
+            <p className="text-muted-foreground">Welcome back! Here's what's happening with your GTA5 boosting business.</p>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={fetchData}
+            disabled={loading}
+            className="flex items-center space-x-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
+          </Button>
+        </div>        {/* Metrics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {metrics.map((metric, index) => (
             <Card key={index} className="bg-[#1C1C1C] border-border/40 card-glow">
@@ -111,10 +182,19 @@ export default function AdminDashboard() {
                 <metric.icon className={`h-4 w-4 ${metric.color}`} />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{metric.value}</div>
-                <p className={`text-xs ${metric.change.startsWith('+') ? 'text-green-400' : 'text-red-400'}`}>
-                  {metric.change} from last month
-                </p>
+                {loading ? (
+                  <div className="space-y-2">
+                    <div className="h-8 bg-muted/20 rounded animate-pulse" />
+                    <div className="h-4 bg-muted/20 rounded animate-pulse w-2/3" />
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold">{metric.value}</div>
+                    <p className="text-xs text-muted-foreground">
+                      {metric.change}
+                    </p>
+                  </>
+                )}
               </CardContent>
             </Card>
           ))}
@@ -132,26 +212,40 @@ export default function AdminDashboard() {
                   </Link>
                 </Button>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {recentOrders.map((order) => (
-                  <div key={order.id} className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2">
-                        <span className="font-semibold text-sm">{order.id}</span>
-                        <Badge className={getStatusColor(order.status)}>{order.status}</Badge>
+            </CardHeader>            <CardContent>
+              {loading ? (
+                <div className="flex items-center justify-center py-8">
+                  <RefreshCw className="h-6 w-6 animate-spin" />
+                  <span className="ml-2">Loading orders...</span>
+                </div>
+              ) : recentOrders.length > 0 ? (
+                <div className="space-y-4">
+                  {recentOrders.map((order) => (
+                    <div key={order.order_id} className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-semibold text-sm">{order.order_id}</span>
+                          <Badge className={getStatusColor(order.order_status)}>{order.order_status}</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{order.customer_name}</p>
+                        <p className="text-xs text-muted-foreground">{order.service}</p>
+                        <p className="text-xs text-muted-foreground">{order.delivery_speed} • {order.platform || 'PC'}</p>
                       </div>
-                      <p className="text-sm text-muted-foreground">{order.customer}</p>
-                      <p className="text-xs text-muted-foreground">{order.service}</p>
+                      <div className="text-right">
+                        <p className="font-semibold text-primary">${order.amount}</p>
+                        <p className="text-xs text-muted-foreground">{new Date(order.order_date).toLocaleDateString()}</p>
+                        <Badge variant="outline" className={order.payment_status === 'Completed' ? 'text-green-400' : 'text-yellow-400'}>
+                          {order.payment_status}
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-primary">{order.amount}</p>
-                      <p className="text-xs text-muted-foreground">{order.date}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  No orders found
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -162,23 +256,39 @@ export default function AdminDashboard() {
                 <Activity className="mr-2 h-5 w-5 text-primary" />
                 Recent Activity
               </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-start space-x-3">
-                    <div className={`w-2 h-2 rounded-full mt-2 ${
-                      activity.type === 'order' ? 'bg-blue-400' :
-                      activity.type === 'customer' ? 'bg-green-400' :
-                      'bg-yellow-400'
-                    }`} />
-                    <div className="flex-1">
-                      <p className="text-sm">{activity.message}</p>
-                      <p className="text-xs text-muted-foreground">{activity.time}</p>
+            </CardHeader>            <CardContent>
+              {loading ? (
+                <div className="flex items-center justify-center py-8">
+                  <RefreshCw className="h-6 w-6 animate-spin" />
+                  <span className="ml-2">Loading activity...</span>
+                </div>
+              ) : recentActivity.length > 0 ? (
+                <div className="space-y-4">
+                  {recentActivity.map((activity, index) => (
+                    <div key={index} className="flex items-start space-x-3">
+                      <div className={`w-2 h-2 rounded-full mt-2 ${
+                        activity.status === 'Completed' ? 'bg-green-400' :
+                        activity.status === 'Processing' || activity.status === 'In Progress' ? 'bg-blue-400' :
+                        activity.status === 'Pending' ? 'bg-yellow-400' :
+                        'bg-red-400'
+                      }`} />
+                      <div className="flex-1">
+                        <p className="text-sm">{activity.message}</p>
+                        <div className="flex items-center space-x-2">
+                          <p className="text-xs text-muted-foreground">{activity.time}</p>
+                          <Badge variant="outline" className="text-xs">
+                            {activity.status}
+                          </Badge>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  No recent activity
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
