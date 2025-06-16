@@ -7,11 +7,21 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { DollarSign, CheckCircle, CreditCard } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { DollarSign, CheckCircle, CreditCard, Loader2 } from 'lucide-react';
+import { useOrderSubmission } from '@/hooks/useOrderSubmission';
 
 export default function BuyCreditsForPcPage() {
   const [creditPackage, setCreditPackage] = useState('shark-card-megalodon');
   const [deliveryTime, setDeliveryTime] = useState('24h');
+  const [customerName, setCustomerName] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [customerNotes, setCustomerNotes] = useState('');
+  const [showOrderForm, setShowOrderForm] = useState(false);
+  
+  const { submitOrder, submitting, error, clearError } = useOrderSubmission();
   
   const creditPackages = {
     'shark-card-megalodon': { name: 'Megalodon Shark Card', amount: '$8,000,000', price: 7.99 },
@@ -23,6 +33,49 @@ export default function BuyCreditsForPcPage() {
   const selectedPackage = creditPackages[creditPackage as keyof typeof creditPackages];
   const deliveryMultiplier = deliveryTime === '1h' ? 2 : deliveryTime === '6h' ? 1.5 : 1;
   const totalPrice = (selectedPackage.price * deliveryMultiplier).toFixed(2);
+
+  const handlePurchaseClick = () => {
+    clearError();
+    setShowOrderForm(true);
+  };
+
+  const handleOrderSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!customerName.trim()) {
+      return;
+    }
+
+    const orderData = {
+      customerName: customerName.trim(),
+      customerEmail: customerEmail.trim() || undefined,
+      deliverySpeed: deliveryTime === '1h' ? '1 Hour' : deliveryTime === '6h' ? '6 Hours' : '24 Hours',
+      service: `PC Credits - ${selectedPackage.name}`,
+      amount: parseFloat(totalPrice),
+      platform: 'PC',
+      serviceType: 'Credits',
+      serviceDetails: {
+        creditType: selectedPackage.name,
+        creditAmount: selectedPackage.amount,
+        deliveryTime: deliveryTime,
+        originalPrice: selectedPackage.price,
+        deliveryMultiplier: deliveryMultiplier
+      },
+      customerNotes: customerNotes.trim() || undefined,
+    };
+
+    const result = await submitOrder(orderData);
+    
+    if (result.success) {
+      // Show success message and redirect or show order details
+      alert(`Order submitted successfully! Order ID: ${result.orderId}`);
+      setShowOrderForm(false);
+      // Reset form
+      setCustomerName('');
+      setCustomerEmail('');
+      setCustomerNotes('');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -109,10 +162,95 @@ export default function BuyCreditsForPcPage() {
                   </div>
                 </div>
 
-                <Button size="lg" className="w-full bg-primary hover:bg-primary/90 text-lg py-3">
-                  <DollarSign className="mr-2 h-5 w-5" />
-                  Purchase Credits - ${totalPrice}
-                </Button>
+                {!showOrderForm ? (
+                  <Button 
+                    size="lg" 
+                    className="w-full bg-primary hover:bg-primary/90 text-lg py-3"
+                    onClick={handlePurchaseClick}
+                  >
+                    <DollarSign className="mr-2 h-5 w-5" />
+                    Purchase Credits - ${totalPrice}
+                  </Button>
+                ) : (
+                  <Card className="bg-background/50 border-border/40">
+                    <CardHeader>
+                      <CardTitle className="text-lg">Complete Your Order</CardTitle>
+                      <CardDescription>
+                        Please provide your details to complete the purchase.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <form onSubmit={handleOrderSubmit} className="space-y-4">
+                        <div>
+                          <Label htmlFor="customerName">Name *</Label>
+                          <Input
+                            id="customerName"
+                            value={customerName}
+                            onChange={(e) => setCustomerName(e.target.value)}
+                            placeholder="Your full name"
+                            required
+                          />
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor="customerEmail">Email (Optional)</Label>
+                          <Input
+                            id="customerEmail"
+                            type="email"
+                            value={customerEmail}
+                            onChange={(e) => setCustomerEmail(e.target.value)}
+                            placeholder="your.email@example.com"
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="customerNotes">Special Instructions (Optional)</Label>
+                          <Textarea
+                            id="customerNotes"
+                            value={customerNotes}
+                            onChange={(e) => setCustomerNotes(e.target.value)}
+                            placeholder="Any special requests or notes..."
+                            rows={3}
+                          />
+                        </div>
+
+                        {error && (
+                          <div className="bg-red-500/20 text-red-400 p-3 rounded-lg text-sm">
+                            {error}
+                          </div>
+                        )}
+
+                        <div className="flex space-x-3">
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            onClick={() => setShowOrderForm(false)}
+                            className="flex-1"
+                          >
+                            Back
+                          </Button>
+                          <Button 
+                            type="submit" 
+                            disabled={submitting || !customerName.trim()}
+                            className="flex-1"
+                          >
+                            {submitting ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Submitting...
+                              </>
+                            ) : (
+                              <>
+                                <DollarSign className="mr-2 h-4 w-4" />
+                                Submit Order
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </form>
+                    </CardContent>
+                  </Card>
+                )}
               </CardContent>
             </Card>
 
