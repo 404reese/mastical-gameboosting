@@ -30,9 +30,9 @@ export default function Footer() {
             <h3 className="font-impact text-lg mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li><Link href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">Home</Link></li>
-              <li><Link href="/buy/gta-5-boost" className="text-sm text-muted-foreground hover:text-primary transition-colors">Services</Link></li>
-              <li><Link href="/faq" className="text-sm text-muted-foreground hover:text-primary transition-colors">FAQ</Link></li>
-              <li><Link href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">About Us</Link></li>
+              <li><Link href="/privacy-policy" className="text-sm text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/terms-and-conditions" className="text-sm text-muted-foreground hover:text-primary transition-colors">Terms of Service</Link></li>
+              <li><Link href="/refunds" className="text-sm text-muted-foreground hover:text-primary transition-colors">Return Policy</Link></li>
             </ul>
           </div>
 
@@ -42,7 +42,7 @@ export default function Footer() {
             <ul className="space-y-2">
               <li><Link href="/buy-money-for-pc" className="text-sm text-muted-foreground hover:text-primary transition-colors">PC Money Boost</Link></li>
               <li><Link href="/buy-money-for-xbox" className="text-sm text-muted-foreground hover:text-primary transition-colors">Xbox Money Boost</Link></li>
-              <li><Link href="/buy-credits-for-pc" className="text-sm text-muted-foreground hover:text-primary transition-colors">PC Credits</Link></li>
+              <li><Link href="/buy-money-for-ps" className="text-sm text-muted-foreground hover:text-primary transition-colors">PS Money Boost</Link></li>
               <li><Link href="/buy-rank-boost" className="text-sm text-muted-foreground hover:text-primary transition-colors">Rank Boost</Link></li>
             </ul>
           </div>
@@ -53,12 +53,12 @@ export default function Footer() {
             <div className="space-y-2">
               <div className="flex items-center text-sm text-muted-foreground">
                 <Mail className="h-4 w-4 mr-2" />
-                support@gta5boost.com
+                premiumgaming696@gmail.com
               </div>
-              <div className="flex items-center text-sm text-muted-foreground">
+              {/* <div className="flex items-center text-sm text-muted-foreground">
                 <Phone className="h-4 w-4 mr-2" />
                 +1 (555) 123-4567
-              </div>
+              </div> */}
               <div className="flex items-center text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4 mr-2" />
                 24/7 Online Support
