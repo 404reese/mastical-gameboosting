@@ -8,8 +8,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Zap, Clock, Star, DollarSign, CheckCircle } from 'lucide-react';
+import { useCart } from '@/hooks/useCart';
 
 export default function BuyMoneyForXboxPage() {
+  const { addToCart } = useCart();
+
   // Define money packages (adjust prices as needed for Xbox)
   const moneyPackages = [
     { amount: 10, label: '10 Million', price: 8 },
@@ -38,6 +41,22 @@ export default function BuyMoneyForXboxPage() {
     '24h': 0,
     '6h': 5,
     '1h': 10,
+  };
+
+  const handleAddToCart = () => {
+    addToCart({
+      service: `GTA5 Money Boost - ${selectedPackage.label}`,
+      amount: selectedPackage.amount,
+      price: selectedPackage.price,
+      platform: 'Xbox',
+      deliverySpeed: deliveryTime === '24h' ? 'Standard' : deliveryTime === '6h' ? 'Express' : 'Ultra Express',
+      deliveryCost: deliveryCosts[deliveryTime],
+      serviceType: 'Money Boost',
+      serviceDetails: {
+        moneyAmount: selectedPackage.amount,
+        consoleType: consoleType,
+      },
+    });
   };
 
   const totalPrice = (selectedPackage.price + deliveryCosts[deliveryTime]).toFixed(2);
@@ -158,7 +177,11 @@ export default function BuyMoneyForXboxPage() {
                   </p>
                 </div>
 
-                <Button size="lg" className="w-full bg-primary hover:bg-primary/90 text-lg py-3">
+                <Button 
+                  size="lg" 
+                  className="w-full bg-primary hover:bg-primary/90 text-lg py-3"
+                  onClick={handleAddToCart}
+                >
                   <DollarSign className="mr-2 h-5 w-5" />
                   Add to Cart - ${totalPrice}
                 </Button>

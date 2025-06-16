@@ -6,7 +6,9 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { DollarSign, CheckCircle, CreditCard } from 'lucide-react';
+import { DollarSign, CheckCircle, CreditCard, ShoppingCart } from 'lucide-react';
+import { useCart } from '@/hooks/useCart';
+import { useToast } from '@/hooks/use-toast';
 
 // Price options as button choices
 const priceOptions = [
@@ -43,9 +45,39 @@ export default function BuyCarCashForPcPage() {
   const [selectedPrice, setSelectedPrice] = useState(priceOptions[0].value);
   const [deliveryType, setDeliveryType] = useState('standard');
 
+  const { addToCart } = useCart();
+  const { toast } = useToast();
+
   const selectedPriceOption = priceOptions.find(opt => opt.value === selectedPrice)!;
   const selectedDelivery = deliveryOptions.find(opt => opt.value === deliveryType)!;
   const totalPrice = (selectedPriceOption.price + selectedDelivery.price).toFixed(2);
+
+  const handleAddToCart = () => {
+    const speedMap: { [key: string]: 'Standard' | 'Express' | 'Ultra Express' } = {
+      'standard': 'Standard',
+      'express': 'Express',
+      'ultra': 'Ultra Express'
+    };
+
+    addToCart({
+      service: `Car + Cash Bundle - ${selectedPriceOption.label}`,
+      amount: selectedPriceOption.value,
+      price: selectedPriceOption.price,
+      platform: 'PC',
+      deliverySpeed: speedMap[deliveryType],
+      deliveryCost: selectedDelivery.price,
+      serviceType: 'car-cash',
+      serviceDetails: {
+        cashAmount: selectedPriceOption.value,
+        includesCar: true
+      }
+    });
+
+    toast({
+      title: "Added to Cart!",
+      description: `${selectedPriceOption.label} car + cash bundle has been added to your cart.`,
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -138,11 +170,9 @@ export default function BuyCarCashForPcPage() {
                   <div className="text-xs text-muted-foreground mt-1">
                     Delivery: {selectedDelivery.label}
                   </div>
-                </div>
-
-                <Button size="lg" className="w-full bg-primary hover:bg-primary/90 text-lg py-3">
-                  <DollarSign className="mr-2 h-5 w-5" />
-                  Purchase Cash - ${totalPrice}
+                </div>                <Button size="lg" className="w-full bg-primary hover:bg-primary/90 text-lg py-3" onClick={handleAddToCart}>
+                  <ShoppingCart className="mr-2 h-5 w-5" />
+                  Add to Cart - ${totalPrice}
                 </Button>
               </CardContent>
             </Card>

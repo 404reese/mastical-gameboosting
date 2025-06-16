@@ -25,7 +25,10 @@ import {
   Star,
   DollarSign,
   CheckCircle,
+  ShoppingCart,
 } from "lucide-react";
+import { useCart } from "@/hooks/useCart";
+import { useToast } from "@/hooks/use-toast";
 
 export default function BuyMoneyForPcPage() {
   // Define money packages
@@ -51,6 +54,9 @@ export default function BuyMoneyForPcPage() {
   const [selectedPackage, setSelectedPackage] = useState(moneyPackages[0]);
   const [deliveryTime, setDeliveryTime] = useState<DeliveryTime>("standard");
 
+  const { addToCart } = useCart();
+  const { toast } = useToast();
+
   // Delivery multiplier (now using fixed additional costs instead)
   const deliveryCosts: Record<DeliveryTime, number> = {
     standard: 0,
@@ -61,6 +67,33 @@ export default function BuyMoneyForPcPage() {
   const totalPrice = (
     selectedPackage.price + deliveryCosts[deliveryTime]
   ).toFixed(2);
+
+  const handleAddToCart = () => {
+    const speedMap: { [key: string]: 'Standard' | 'Express' | 'Ultra Express' } = {
+      'standard': 'Standard',
+      'express': 'Express',
+      'ultraExpress': 'Ultra Express'
+    };
+
+    addToCart({
+      service: `GTA5 Money - ${selectedPackage.label}`,
+      amount: selectedPackage.amount,
+      price: selectedPackage.price,
+      platform: 'PC',
+      deliverySpeed: speedMap[deliveryTime],
+      deliveryCost: deliveryCosts[deliveryTime],
+      serviceType: 'money-boost',
+      serviceDetails: {
+        cashAmount: selectedPackage.amount,
+        packageType: selectedPackage.label
+      }
+    });
+
+    toast({
+      title: "Added to Cart!",
+      description: `${selectedPackage.label} money boost has been added to your cart.`,
+    });
+  };
 
   const benefits = [
     {
@@ -239,8 +272,9 @@ export default function BuyMoneyForPcPage() {
                 <Button
                   size="lg"
                   className="w-full bg-primary hover:bg-primary/90 text-lg py-3"
+                  onClick={handleAddToCart}
                 >
-                  <DollarSign className="mr-2 h-5 w-5" />
+                  <ShoppingCart className="mr-2 h-5 w-5" />
                   Add to Cart - ${totalPrice}
                 </Button>
 

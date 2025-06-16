@@ -7,12 +7,17 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, DollarSign, CheckCircle, Trophy } from 'lucide-react';
+import { TrendingUp, DollarSign, CheckCircle, Trophy, ShoppingCart } from 'lucide-react';
+import { useCart } from '@/hooks/useCart';
+import { useToast } from '@/hooks/use-toast';
 
 export default function BuyRankBoostPage() {
   const [platform, setPlatform] = useState('pc');
   const [deliveryTime, setDeliveryTime] = useState<'standard' | 'express' | 'ultra' | null>('standard');
   const [selectedRank, setSelectedRank] = useState<100 | 200 | null>(null);
+  
+  const { addToCart } = useCart();
+  const { toast } = useToast();
 
   const rankOptions = [
     { rank: 100, price: 22.5 },
@@ -30,6 +35,41 @@ export default function BuyRankBoostPage() {
   const totalPrice = selectedOption
     ? (selectedOption.price + (selectedDelivery ? selectedDelivery.fee : 0)).toFixed(2)
     : '0.00';
+
+  const handleAddToCart = () => {
+    if (!selectedRank || !selectedOption || !selectedDelivery || !deliveryTime) return;
+
+    const platformMap: { [key: string]: 'PC' | 'Xbox' | 'PlayStation' } = {
+      'pc': 'PC',
+      'xbox': 'Xbox',
+      'ps5': 'PlayStation'
+    };
+
+    const speedMap: { [key: string]: 'Standard' | 'Express' | 'Ultra Express' } = {
+      'standard': 'Standard',
+      'express': 'Express',
+      'ultra': 'Ultra Express'
+    };
+
+    addToCart({
+      service: `Rank Boost to Level ${selectedRank}`,
+      amount: selectedRank,
+      price: selectedOption.price,
+      platform: platformMap[platform],
+      deliverySpeed: speedMap[deliveryTime],
+      deliveryCost: selectedDelivery.fee,
+      serviceType: 'rank-boost',
+      serviceDetails: {
+        targetRank: selectedRank,
+        currentPlatform: platform
+      }
+    });
+
+    toast({
+      title: "Added to Cart!",
+      description: `Rank boost to level ${selectedRank} has been added to your cart.`,
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -135,9 +175,10 @@ export default function BuyRankBoostPage() {
                   size="lg" 
                   className="w-full bg-primary hover:bg-primary/90 text-lg py-3"
                   disabled={!selectedRank}
+                  onClick={handleAddToCart}
                 >
-                  <DollarSign className="mr-2 h-5 w-5" />
-                  {selectedRank ? `Order Rank Boost - $${totalPrice}` : 'Select Rank Option'}
+                  <ShoppingCart className="mr-2 h-5 w-5" />
+                  {selectedRank ? `Add to Cart - $${totalPrice}` : 'Select Rank Option'}
                 </Button>
               </CardContent>
             </Card>

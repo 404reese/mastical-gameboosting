@@ -8,8 +8,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Zap, Clock, Star, DollarSign, CheckCircle } from 'lucide-react';
+import { useCart } from '@/hooks/useCart';
 
 export default function BuyMoneyForPs5Page() {
+  const { addToCart } = useCart();
+  
   // Define money packages (adjust prices as needed)
   const moneyPackages: { amount: number; label: string; price: number }[] = [
     { amount: 10, label: '10 Million', price: 8 },
@@ -30,6 +33,24 @@ export default function BuyMoneyForPs5Page() {
   const [selectedPackage, setSelectedPackage] = useState<typeof moneyPackages[0] | undefined>(moneyPackages[0]);
   const [deliveryTime, setDeliveryTime] = useState<DeliveryTime>('standard');
   const [psVersion, setPsVersion] = useState('ps5');
+
+  const handleAddToCart = () => {
+    if (!selectedPackage) return;
+    
+    addToCart({
+      service: `GTA5 Money Boost - ${selectedPackage.label}`,
+      amount: selectedPackage.amount,
+      price: selectedPackage.price,
+      platform: 'PlayStation',
+      deliverySpeed: deliveryTime === 'standard' ? 'Standard' : deliveryTime === 'express' ? 'Express' : 'Ultra Express',
+      deliveryCost: deliveryCosts[deliveryTime],
+      serviceType: 'Money Boost',
+      serviceDetails: {
+        moneyAmount: selectedPackage.amount,
+        psVersion: psVersion,
+      },
+    });
+  };
 
   const deliveryCosts: Record<DeliveryTime, number> = {
     standard: 0,
@@ -154,7 +175,11 @@ export default function BuyMoneyForPs5Page() {
                   </p>
                 </div>
 
-                <Button size="lg" className="w-full bg-primary hover:bg-primary/90 text-lg py-3">
+                <Button 
+                  size="lg" 
+                  className="w-full bg-primary hover:bg-primary/90 text-lg py-3"
+                  onClick={handleAddToCart}
+                >
                   <DollarSign className="mr-2 h-5 w-5" />
                   Add to Cart - ${totalPrice}
                 </Button>
