@@ -6,12 +6,14 @@ export const useOrderSubmission = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const submitOrder = async (formData: OrderFormData) => {
+  const submitOrder = async (
+    formData: OrderFormData,
+    paymentStatus?: 'Pending' | 'Completed',
+    orderStatus?: 'Pending' | 'Processing'
+  ) => {
     try {
       setSubmitting(true);
-      setError(null);
-
-      // Transform form data to match order insert type
+      setError(null);      // Transform form data to match order insert type
       const orderData = {
         customer_name: formData.customerName,
         customer_email: formData.customerEmail,
@@ -22,6 +24,11 @@ export const useOrderSubmission = () => {
         service_type: formData.serviceType,
         service_details: formData.serviceDetails,
         customer_notes: formData.customerNotes,
+        gta_account_email: formData.gtaAccountEmail,
+        gta_account_password: formData.gtaAccountPassword,
+        gta_account_credits: formData.gtaAccountCredits,
+        payment_status: paymentStatus || 'Pending',
+        order_status: orderStatus || 'Pending',
       };
 
       const { data, error } = await OrderService.createOrder(orderData);

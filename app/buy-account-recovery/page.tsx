@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Shield, DollarSign, CheckCircle, AlertTriangle, Clock, Users } from 'lucide-react';
+import { useCart } from '@/hooks/useCart';
+import { useToast } from '@/hooks/use-toast';
 
 export default function BuyAccountRecoveryPage() {
   const [platform, setPlatform] = useState('pc');
@@ -85,6 +87,42 @@ export default function BuyAccountRecoveryPage() {
       description: 'Continuous monitoring and follow-up until resolution'
     }
   ];
+
+  const { addToCart } = useCart();
+  const { toast } = useToast();
+
+  const handleSubmitRecovery = () => {
+    const speedMap: { [key: string]: 'Standard' | 'Express' | 'Ultra Express' } = {
+      'standard': 'Standard',
+      'priority': 'Express',
+      'urgent': 'Ultra Express'
+    };
+
+    const selectedBanType = banTypes.find(type => type.id === banType);
+    
+    addToCart({
+      service: `Account Recovery - ${selectedBanType?.title}`,
+      amount: 0,
+      price: parseFloat(totalPrice),
+      platform: platform === 'pc' ? 'PC' : platform === 'xbox' ? 'Xbox' : 'PlayStation',
+      deliverySpeed: speedMap[urgency],
+      deliveryCost: 0,
+      serviceType: 'account-recovery',
+      serviceDetails: {
+        banType: banType,
+        banReason: banReason,
+        urgency: urgency,
+        accountDetails: accountDetails,
+        successRate: selectedBanType?.successRate,
+        timeframe: selectedBanType?.timeframe
+      }
+    });
+
+    toast({
+      title: "Added to Cart!",
+      description: `Account recovery service has been added to your cart.`,
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -222,9 +260,13 @@ export default function BuyAccountRecoveryPage() {
                   </p>
                 </div>
 
-                <Button size="lg" className="w-full bg-primary hover:bg-primary/90 text-lg py-3">
+                <Button 
+                  size="lg" 
+                  className="w-full bg-primary hover:bg-primary/90 text-lg py-3"
+                  onClick={handleSubmitRecovery}
+                >
                   <DollarSign className="mr-2 h-5 w-5" />
-                  Submit Recovery Request - ${totalPrice}
+                  Add to Cart - ${totalPrice}
                 </Button>
                 
                 <p className="text-xs text-center text-muted-foreground">

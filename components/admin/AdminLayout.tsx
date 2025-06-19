@@ -59,7 +59,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center justify-between p-6 border-b border-border/40">
-            <Link href="/admin/dashboard" className="flex items-center space-x-2">
+            <Link href="/admin/orders" className="flex items-center space-x-2">
               <Gamepad2 className="h-8 w-8 text-primary" />
               <span className="font-impact text-xl">ADMIN PANEL</span>
             </Link>

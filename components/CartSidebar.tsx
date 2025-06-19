@@ -112,8 +112,7 @@ export default function CartSidebar({ children }: CartSidebarProps) {
                       )}
                     </div>
                   ))}
-                </div>
-              </div>
+                </div>              </div>
 
               <div className="border-t border-border/40 pt-4 space-y-4">
                 <div className="flex justify-between items-center">

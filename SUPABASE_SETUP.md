@@ -61,6 +61,9 @@ The SQL script already includes RLS policies. You can modify them in the Supabas
 | updated_at | TIMESTAMP | Last update time |
 | estimated_completion | TIMESTAMP | Estimated completion time |
 | completed_at | TIMESTAMP | Actual completion time |
+| gta_account_email | VARCHAR(255) | GTA account email for service delivery |
+| gta_account_password | VARCHAR(255) | GTA account password (encrypted) |
+| gta_account_credits | INTEGER | GTA account credits in millions |
 
 ## Usage
 

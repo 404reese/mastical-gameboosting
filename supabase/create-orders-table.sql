@@ -11,15 +11,18 @@ CREATE TABLE orders (
   order_status VARCHAR(50) NOT NULL DEFAULT 'Pending' CHECK (order_status IN ('Pending', 'Processing', 'In Progress', 'Completed', 'Cancelled')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  
-  -- Additional fields for better order management
+    -- Additional fields for better order management
   platform VARCHAR(20) CHECK (platform IN ('PC', 'Xbox', 'PlayStation')),
   service_type VARCHAR(50), -- e.g., 'Money Boost', 'Rank Boost', 'Credits', etc.
   service_details JSONB, -- Store additional service-specific details
   customer_notes TEXT,
   admin_notes TEXT,
   estimated_completion TIMESTAMP WITH TIME ZONE,
-  completed_at TIMESTAMP WITH TIME ZONE
+  completed_at TIMESTAMP WITH TIME ZONE,
+    -- GTA Account credentials for service delivery
+  gta_account_email VARCHAR(255),
+  gta_account_password TEXT, -- Encrypted password for account access
+  gta_account_credits DECIMAL(15, 2), -- GTA account credit amount in millions
 );
 
 -- Create indexes for better performance
@@ -99,9 +102,17 @@ SELECT
   payment_status,
   order_status,
   platform,
+  service_type,
+  service_details,
+  customer_notes,
+  admin_notes,
+  gta_account_email,
+  gta_account_password,
   created_at::DATE as order_date,
   created_at,
   updated_at,
+  estimated_completion,
+  completed_at,
   CASE 
     WHEN order_status = 'Completed' THEN completed_at
     WHEN estimated_completion IS NOT NULL THEN estimated_completion
@@ -113,20 +124,36 @@ ORDER BY created_at DESC;
 -- Enable Row Level Security (RLS) for security
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 
+-- Create policy for anonymous users to insert orders (customers)
+CREATE POLICY "Allow anonymous order creation" ON orders
+  FOR INSERT WITH CHECK (true);
+
 -- Create policy for authenticated users to insert orders (customers)
 CREATE POLICY "Users can insert their own orders" ON orders
-  FOR INSERT WITH CHECK (true); -- Allow anyone to create orders
+  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+-- Create policy for anonymous users to view orders (for admin access)
+CREATE POLICY "Allow public order access" ON orders
+  FOR SELECT USING (true);
 
 -- Create policy for admin users to view all orders
 CREATE POLICY "Admins can view all orders" ON orders
   FOR SELECT USING (
-    auth.jwt() ->> 'role' = 'admin' OR 
-    auth.jwt() ->> 'email' = customer_email
+    (current_setting('request.jwt.claims', true)::json->>'role' = 'admin') OR
+    (auth.role() = 'service_role') OR
+    (auth.role() = 'anon')
   );
 
 -- Create policy for admin users to update orders
 CREATE POLICY "Admins can update orders" ON orders
-  FOR UPDATE USING (auth.jwt() ->> 'role' = 'admin');
+  FOR UPDATE USING (
+    (current_setting('request.jwt.claims', true)::json->>'role' = 'admin') OR
+    (auth.role() = 'service_role')
+  );
+
+-- Grant permissions to anonymous users for order creation
+GRANT INSERT ON orders TO anon;
+GRANT SELECT ON orders TO anon;
 
 -- Grant permissions to authenticated users
 GRANT SELECT, INSERT ON orders TO authenticated;

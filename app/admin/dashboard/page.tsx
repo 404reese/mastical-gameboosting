@@ -34,27 +34,21 @@ export default function AdminDashboard() {
     completed: 0,
     cancelled: 0,
     totalRevenue: 0
-  });
-  const fetchData = async () => {
+  });  const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
-      // Fetch orders
-      const { data: ordersData, error: ordersError } = await OrderService.getAllOrders();
-      if (ordersError) {
-        console.error('Error fetching orders:', ordersError);
-        setError('Failed to load orders');
-      } else {
-        setOrders(ordersData || []);
-      }
-
-      // Fetch stats
-      const { data: statsData, error: statsError } = await OrderService.getOrderStats();
-      if (statsError) {
-        console.error('Error fetching stats:', statsError);
-        setError('Failed to load statistics');
-      } else {
-        setStats(statsData || {
+      // Fetch orders and stats in parallel
+      const [ordersResult, statsResult] = await Promise.all([
+        OrderService.getAllOrders(),
+        OrderService.getOrderStats()
+      ]);
+      
+      if (ordersResult.error || statsResult.error) {
+        console.error('Error fetching data:', ordersResult.error || statsResult.error);
+        setError('Failed to load dashboard data');      } else {
+        setOrders((ordersResult.data || []).slice(0, 10)); // Get latest 10 orders
+        setStats(statsResult.data || {
           total: 0,
           pending: 0,
           processing: 0,
@@ -135,8 +129,8 @@ export default function AdminDashboard() {
       default: return 'bg-gray-500/20 text-gray-400';
     }
   };  return (
-    <AdminLayout>
-      <div className="space-y-8">
+    
+      <div className="space-y-8 p-8">
         {/* Error Message */}
         {error && (
           <Card className="bg-red-900/20 border-red-500/50">
@@ -212,8 +206,7 @@ export default function AdminDashboard() {
                   </Link>
                 </Button>
               </div>
-            </CardHeader>            <CardContent>
-              {loading ? (
+            </CardHeader>            <CardContent>              {loading ? (
                 <div className="flex items-center justify-center py-8">
                   <RefreshCw className="h-6 w-6 animate-spin" />
                   <span className="ml-2">Loading orders...</span>
@@ -229,7 +222,20 @@ export default function AdminDashboard() {
                         </div>
                         <p className="text-sm text-muted-foreground">{order.customer_name}</p>
                         <p className="text-xs text-muted-foreground">{order.service}</p>
-                        <p className="text-xs text-muted-foreground">{order.delivery_speed} • {order.platform || 'PC'}</p>
+                        <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                          <span>{order.delivery_speed}</span>
+                          <span>•</span>
+                          <span>{order.platform || 'PC'}</span>
+                          {order.gta_account_credits && (
+                            <>
+                              <span>•</span>
+                              <span className="text-green-400 font-semibold">{order.gta_account_credits}M Credits</span>
+                            </>
+                          )}
+                        </div>
+                        {order.gta_account_email && (
+                          <p className="text-xs text-blue-400 mt-1">GTA: {order.gta_account_email}</p>
+                        )}
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-primary">${order.amount}</p>
@@ -323,6 +329,6 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    
   );
 }

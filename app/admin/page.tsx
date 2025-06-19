@@ -22,7 +22,7 @@ export default function AdminLoginPage() {
     if (credentials.username === 'admin' && credentials.password === '1234') {
       // Set session in localStorage
       localStorage.setItem('adminAuth', 'true');
-      router.push('/admin/dashboard');
+      router.push('/admin/orders');
     } else {
       setError('Invalid username or password');
     }

@@ -23,4 +23,6 @@ export interface CheckoutData {
   customerName: string;
   customerEmail: string;
   customerNotes?: string;
+  gtaAccountEmail: string;
+  gtaAccountPassword: string;
 }

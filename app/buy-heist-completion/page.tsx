@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Target, DollarSign, CheckCircle, Crown, Users } from 'lucide-react';
+import { useCart } from '@/hooks/useCart';
+import { useToast } from '@/hooks/use-toast';
 
 export default function BuyHeistCompletionPage() {
   const [platform, setPlatform] = useState('pc');
@@ -151,6 +153,48 @@ export default function BuyHeistCompletionPage() {
       challenge: true
     }
   ];
+
+  const { addToCart } = useCart();
+  const { toast } = useToast();
+
+  const handleAddToCart = () => {
+    if (selectedItems.length === 0) return;
+
+    const speedMap: { [key: string]: 'Standard' | 'Express' | 'Ultra Express' } = {
+      '72h': 'Standard',
+      '48h': 'Standard', 
+      '24h': 'Express'
+    };
+
+    selectedItems.forEach(([heist]) => {
+      const heistData = heistCategories.find(h => h.id === heist);
+      if (heistData) {
+        const finalPrice = heistData.price * platformMultiplier * deliveryMultiplier * difficultyMultiplier;
+        
+        addToCart({
+          service: `GTA5 Heist - ${heistData.title}`,
+          amount: 0, // Heists don't have cash amounts
+          price: finalPrice,
+          platform: platform === 'pc' ? 'PC' : platform === 'xbox' ? 'Xbox' : 'PlayStation',
+          deliverySpeed: speedMap[deliveryTime] || 'Standard',
+          deliveryCost: 0,
+          serviceType: 'heist-completion',
+          serviceDetails: {
+            heistType: heist,
+            difficulty: difficulty,
+            platform: platform,
+            deliveryTime: deliveryTime,
+            payout: heistData.payout
+          }
+        });
+      }
+    });
+
+    toast({
+      title: "Added to Cart!",
+      description: `${selectedItems.length} heist(s) added to your cart.`,
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -320,9 +364,10 @@ export default function BuyHeistCompletionPage() {
                     size="lg" 
                     className="w-full bg-primary hover:bg-primary/90 text-lg py-3"
                     disabled={selectedItems.length === 0}
+                    onClick={handleAddToCart}
                   >
                     <DollarSign className="mr-2 h-5 w-5" />
-                    {selectedItems.length > 0 ? `Order Heist Service - $${totalPrice}` : 'Select Heists to Continue'}
+                    {selectedItems.length > 0 ? `Add to Cart - $${totalPrice}` : 'Select Heists to Continue'}
                   </Button>
                 </CardContent>
               </Card>
