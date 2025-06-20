@@ -35,22 +35,15 @@ export default function ContactPage() {
       icon: Mail,
       title: 'Email Support',
       description: 'Get help via email',
-      contact: 'support@gta5boost.com',
+      contact: 'premiumgaming696@gmail.com',
       response: 'Response within 2 hours'
     },
     {
       icon: MessageCircle,
       title: 'Live Chat',
       description: '24/7 instant support',
-      contact: 'Available on website',
+      contact: 'Available on discord',
       response: 'Instant response'
-    },
-    {
-      icon: Phone,
-      title: 'Phone Support',
-      description: 'Speak with our team',
-      contact: '+1 (555) 123-4567',
-      response: 'Available 24/7'
     }
   ];
 
@@ -122,7 +115,7 @@ export default function ContactPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             
             {/* Contact Form */}
-            <Card className="bg-background border-border/40">
+            {/* <Card className="bg-background border-border/40">
               <CardHeader>
                 <CardTitle className="font-impact text-2xl flex items-center">
                   <Send className="mr-2 h-6 w-6 text-primary" />
@@ -209,7 +202,7 @@ export default function ContactPage() {
                   </Button>
                 </form>
               </CardContent>
-            </Card>
+            </Card> */}
 
             {/* Contact Info & FAQ */}
             <div className="space-y-8">
@@ -255,7 +248,7 @@ export default function ContactPage() {
                     <Mail className="h-5 w-5 text-primary mt-0.5" />
                     <div>
                       <p className="font-semibold">Email Support</p>
-                      <p className="text-sm text-muted-foreground">support@gta5boost.com</p>
+                      <p className="text-sm text-muted-foreground">premiumgaming696@gmail.com</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-3">

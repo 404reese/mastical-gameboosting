@@ -6,6 +6,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ServiceCard from '@/components/ServiceCard';
 import { ArrowRight, Shield, Zap, Clock, DollarSign, Users, Star } from 'lucide-react';
+import { AiOutlineDiscord } from "react-icons/ai";
+
 
 export default function Home() {
   const featuredServices = [
@@ -79,7 +81,7 @@ export default function Home() {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <Card className="bg-background border-border/40 text-center card-glow">
               <CardHeader>
                 <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -107,13 +109,32 @@ export default function Home() {
                 </CardDescription>
               </CardContent>
             </Card>
+
+            <Card className="bg-background border-border/40 text-center card-glow">
+              <CardHeader>
+                <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <AiOutlineDiscord  className="h-8 w-8 text-primary" />
+                </div>
+                <CardTitle className="font-impact text-xl">3. Join Discord for Support</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-base">
+                  Join our Discord server for support, updates, and community interactions.
+                </CardDescription>
+                {/* <Button size="sm" className="bg-primary hover:bg-primary/90 text-base px-8 py-3 mt-4">
+                  <Link href="https://discord.gg/gamingboosters" target="_blank" rel="noopener noreferrer" className="flex items-center">
+                    Join Discord <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button> */}
+              </CardContent>
+            </Card>
             
             <Card className="bg-background border-border/40 text-center card-glow">
               <CardHeader>
                 <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Star className="h-8 w-8 text-primary" />
                 </div>
-                <CardTitle className="font-impact text-xl">3. Enjoy GTA5</CardTitle>
+                <CardTitle className="font-impact text-xl">4. Enjoy GTA5</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
@@ -121,12 +142,14 @@ export default function Home() {
                 </CardDescription>
               </CardContent>
             </Card>
+            
+            
           </div>
         </div>
       </section>
 
       {/* Featured Services Section */}
-      <section className="py-20">
+      {/* <section className="py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="font-impact text-4xl mb-4">Featured Services</h2>
@@ -149,7 +172,7 @@ export default function Home() {
             </Button>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Trust Section */}
       <section className="py-20 bg-[#1C1C1C]">

@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { CheckCircle, Package, Download } from 'lucide-react';
+import { CheckCircle, Package, Download, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
+import { BiHappyBeaming } from "react-icons/bi";
+
 
 export default function CheckoutSuccessPage() {
   const searchParams = useSearchParams();
@@ -87,27 +89,40 @@ export default function CheckoutSuccessPage() {
               
               {orderId && (
                 <div className="bg-background/50 rounded-lg p-4">
-                  <h3 className="font-semibold mb-2">Order Details</h3>
+                  <h3 className=" mb-2">Order Details</h3>
                   <p className="text-sm text-muted-foreground">
                     Order ID: <span className="font-mono">{orderId}</span>
                   </p>
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-background/50 rounded-lg p-4">
-                  <div className="flex items-center mb-2">
-                    <Package className="h-5 w-5 mr-2 text-primary" />
-                    <h4 className="font-semibold">What's Next?</h4>
-                  </div>
-                  <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• Order confirmation email sent</li>
-                    <li>• Processing will begin shortly</li>
-                    <li>• You'll receive updates via email</li>
-                  </ul>
+              {/* Make What's Next section full width */}
+              <div className="bg-background/50 rounded-lg px-8 py-8 mb-4 text-center">
+                <div className="flex flex-col items-center mb-4">
+                  <BiHappyBeaming className="h-8 w-8 mb-2 text-primary" />
+                  <h4 className="text-2xl mb-2">What's Next?</h4>
                 </div>
+                <ul className="text-lg text-muted-foreground space-y-3 mb-4">
+                  <li>
+                    <span>• Join our Discord server for order updates and support</span>
+                  </li>
+                  <li>
+                    <span>• Processing will begin shortly</span>
+                  </li>
+                  <li>
+                    <span>• You'll receive updates via discord</span>
+                  </li>
+                </ul>
+                <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-10 py-4 mx-auto mt-2">
+                  <Link href="https://discord.gg/gamingboosters" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
+                    Join Discord <ArrowRight className="ml-2 h-6 w-6" />
+                  </Link>
+                </Button>
+              </div>
 
-                <div className="bg-background/50 rounded-lg p-4">
+              {/* Keep grid for other sections if needed */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* <div className="bg-background/50 rounded-lg p-4">
                   <div className="flex items-center mb-2">
                     <Download className="h-5 w-5 mr-2 text-primary" />
                     <h4 className="font-semibold">Support</h4>
@@ -117,11 +132,11 @@ export default function CheckoutSuccessPage() {
                     <li>• Live order tracking</li>
                     <li>• Satisfaction guaranteed</li>
                   </ul>
-                </div>
+                </div> */}
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Button asChild className="flex-1">
+                <Button variant="outline" asChild className="flex-1">
                   <Link href="/">
                     Return to Home
                   </Link>

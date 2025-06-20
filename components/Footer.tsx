@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { Facebook, Twitter, Instagram, Mail, Phone, MapPin } from 'lucide-react';
+import { AiOutlineDiscord } from "react-icons/ai";
+
 
 export default function Footer() {
   return (
@@ -55,10 +57,10 @@ export default function Footer() {
                 <Mail className="h-4 w-4 mr-2" />
                 premiumgaming696@gmail.com
               </div>
-              {/* <div className="flex items-center text-sm text-muted-foreground">
-                <Phone className="h-4 w-4 mr-2" />
-                +1 (555) 123-4567
-              </div> */}
+              <div className="flex items-center text-sm text-muted-foreground">
+                <AiOutlineDiscord className="h-5 w-5 mr-2" />
+                 <a href="https://discord.gg/Wam3dK9j" target="_blank" className="hover:underline">Premium Gaming</a>
+              </div>
               <div className="flex items-center text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4 mr-2" />
                 24/7 Online Support
