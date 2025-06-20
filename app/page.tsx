@@ -61,7 +61,7 @@ export default function Home() {
             Level Up Your GTA5 Experience
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Professional boosting services for GTA5. Fast, secure, and affordable. Get the money, ranks, and items you need.
+            Professional boosting services for GTA5. Fast, secure, and affordable. Get the money, ranks, and items you need
           </p>
           <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8 py-3">
             <Link href="/buy/gta-5-boost" className="flex items-center">
